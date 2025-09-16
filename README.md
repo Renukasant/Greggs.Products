@@ -6,12 +6,12 @@ Welcome to the Greggs Products API! This project provides endpoints to retrieve 
 
 ## Features
 
-- ✅ Retrieve latest products using a data access layer
-- 💶 Convert product prices from GBP to EUR
-- 📋 Logging with `ILogger` for traceability
-- 🔄 AutoMapper for DTO mapping
-- 🧪 Unit tested with xUnit and Moq
-- 📂 Clean separation of concerns (Controller → Service → DataAccess)
+- Retrieve latest products using a data access layer
+-  Convert product prices from GBP to EUR
+-  Logging with `ILogger` for traceability
+-  AutoMapper for DTO mapping
+-  Unit tested with xUnit and Moq
+-  Clean separation of concerns (Controller → Service → DataAccess)
 
 ---
 
