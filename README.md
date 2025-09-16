@@ -2,7 +2,7 @@ Greggs.Products API
 ===================
 
 Welcome to the Greggs Products API! This project provides endpoints to retrieve the latest Greggs menu items and convert their prices to Euros. It demonstrates clean architecture, structured logging, and AutoMapper integration.
-
+Lead Software Developer Coding Task Submission
 Features
 --------
 - Retrieve latest products using a data access layer
@@ -82,9 +82,4 @@ Notes
 - Paging is handled via pageStart and pageSize query parameters.
 - Logging is added for both endpoints using ILogger<ProductController>.
 
-Next Steps
-----------
-- Add Swagger for API documentation
-- Add filtering and sorting
-- Add integration tests using WebApplicationFactory<T>
-- Add caching or authentication if needed
+
