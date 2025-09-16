@@ -1,7 +1,11 @@
+using Greggs.Products.Api.DataAccess;
+using Greggs.Products.Api.Models;
 using Microsoft.AspNetCore.Builder;
+using Greggs.Products.Api.Services;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Greggs.Products.Api.Mapping;
 
 namespace Greggs.Products.Api;
 
@@ -12,6 +16,11 @@ public class Startup
         services.AddControllers();
 
         services.AddSwaggerGen();
+        services.AddScoped<IDataAccess<Product>, ProductAccess>();
+        services.AddScoped<IProductService, ProductService>();
+        services.AddAutoMapper(typeof(MappingProfile));
+
+        services.AddControllers();
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -32,4 +41,6 @@ public class Startup
 
         app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
     }
+
+
 }
