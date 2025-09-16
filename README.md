@@ -1,39 +1,122 @@
-# Greggs.Products
-## Introduction
-Hello and welcome to the Greggs Products repository, thanks for finding it!
+# Greggs.Products API
 
-## The Solution
-So at the moment the api is currently returning a random selection from a fixed set of Greggs products directly 
-from the controller itself. We currently have a data access class and it's interface but 
-it's not plugged in (please ignore the class itself, we're pretending it hits a database),
-we're also going to pretend that the data access functionality is fully tested so we don't need 
-to worry about testing those lines of functionality.
+Welcome to the Greggs Products API! This project provides endpoints to retrieve the latest Greggs menu items and convert their prices to Euros. It demonstrates clean architecture, structured logging, and AutoMapper integration.
 
-We're mainly looking for the way you work, your code structure and how you would approach tackling the following 
-scenarios.
+---
+
+## Features
+
+- ✅ Retrieve latest products using a data access layer
+- 💶 Convert product prices from GBP to EUR
+- 📋 Logging with `ILogger` for traceability
+- 🔄 AutoMapper for DTO mapping
+- 🧪 Unit tested with xUnit and Moq
+- 📂 Clean separation of concerns (Controller → Service → DataAccess)
+
+---
+
+## Project Structure
+
+Greggs.Products/ ├── Api/ │ ├── Controllers/ │ │ └── ProductController.cs │ ├── Models/ │ │ ├── Product.cs │ │ └── ProductEuroDto.cs │ ├── Services/ │ │ └── ProductService.cs │ ├── Mapping/ │ │ └── MappingProfile.cs ├── UnitTests/ │ └── ProductServiceTests.cs
+
+Code
+
+---
 
 ## User Stories
-Our product owners have asked us to implement the following stories, we'd like you to have 
-a go at implementing them. You can use whatever patterns you're used to using or even better 
-whatever patterns you would like to use to achieve the goal. Anyhow, back to the 
-user stories:
 
-### User Story 1
-**As a** Greggs Fanatic<br/>
-**I want to** be able to get the latest menu of products rather than the random static products it returns now<br/>
-**So that** I get the most recently available products.
+### User Story 1: Latest Products
 
-**Acceptance Criteria**<br/>
-**Given** a previously implemented data access layer<br/>
-**When** I hit a specified endpoint to get a list of products<br/>
-**Then** a list or products is returned that uses the data access implementation rather than the static list it current utilises
+**As a** Greggs Fanatic  
+**I want to** get the latest menu of products  
+**So that** I see the most recently available items
 
-### User Story 2
-**As a** Greggs Entrepreneur<br/>
-**I want to** get the price of the products returned to me in Euros<br/>
-**So that** I can set up a shop in Europe as part of our expansion
+✅ Implemented via `GET /product/latest`  
+Uses `_dataAccess.GetLatestProducts()` with paging support.
 
-**Acceptance Criteria**<br/>
-**Given** an exchange rate of 1GBP to 1.11EUR<br/>
-**When** I hit a specified endpoint to get a list of products<br/>
-**Then** I will get the products and their price(s) returned
+---
+
+### User Story 2: Prices in Euros
+
+**As a** Greggs Entrepreneur  
+**I want to** get product prices in Euros  
+**So that** I can plan European expansion
+
+Implemented via `GET /product/euro`  
+Uses AutoMapper to convert prices with a fixed exchange rate of `1.11`.
+
+---
+
+## 🔧 Endpoints
+
+### `GET /product/latest`
+
+Returns a paginated list of products from the data access layer.
+
+```csharp
+public IEnumerable<Product> GetLatest(int pageStart = 0, int pageSize = 5)
+GET /product/euro
+Returns a paginated list of products with prices converted to Euros.
+
+csharp
+public IEnumerable<ProductEuroDto> GetProductsInEuro(int pageStart = 0, int pageSize = 5)
+AutoMapper Setup
+MappingProfile.cs
+csharp
+public class MappingProfile : Profile
+{
+    public MappingProfile()
+    {
+        CreateMap<Product, ProductEuroDto>()
+            .ForMember(dest => dest.PriceInEuros,
+                       opt => opt.MapFrom(src => Math.Round(src.PriceInPounds * 1.11m, 2)));
+    }
+}
+Registration
+csharp
+services.AddAutoMapper(typeof(MappingProfile));
+Unit Testing
+Tests written using xUnit and Moq. Example:
+
+csharp
+[Fact]
+public void GetProductsInEuro_MapsCorrectly()
+{
+    var mockDataAccess = new Mock<IDataAccess<Product>>();
+    mockDataAccess.Setup(d => d.GetLatestProducts()).Returns(new List<Product>
+    {
+        new Product { Name = "Sausage Roll", PriceInPounds = 1.00m },
+        new Product { Name = "Vegan Bake", PriceInPounds = 2.00m }
+    });
+
+    var config = new MapperConfiguration(cfg => cfg.AddProfile<MappingProfile>());
+    var mapper = config.CreateMapper();
+
+    var service = new ProductService(mockDataAccess.Object, mapper);
+
+    var result = service.GetProductsInEuro(0, 2).ToList();
+
+    Assert.Equal(1.11m, result[0].PriceInEuros);
+    Assert.Equal(2.22m, result[1].PriceInEuros);
+}
+ How to Run
+Clone the repo
+
+Restore packages:
+
+bash
+dotnet restore
+Build the solution:
+
+bash
+dotnet build
+Run tests:
+
+bash
+dotnet test
+Notes
+Exchange rate is hardcoded as 1.11m for GBP → EUR conversion.
+
+Paging is handled via pageStart and pageSize query parameters.
+
+Logging is added for both endpoints using ILogger<ProductController>.
